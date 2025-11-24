@@ -3,21 +3,9 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
-const resolveBackendUrl = () => {
-    const envUrl = import.meta.env.VITE_BACKEND_URL;
-
-    if (envUrl && envUrl.trim().length > 0) {
-        return envUrl.trim().replace(/\/$/, "");
-    }
-
-    if (typeof window !== "undefined" && window.location?.origin) {
-        return window.location.origin;
-    }
-
-    return "http://localhost:3000";
-};
-
-const BACKEND_URL = resolveBackendUrl();
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
+    ? import.meta.env.VITE_BACKEND_URL.trim().replace(/\/$/, "")
+    : "http://localhost:3000";
 
 const buildApiUrl = (path) => {
     if (!path.startsWith("/")) {
