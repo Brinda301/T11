@@ -3,7 +3,29 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const resolveBackendUrl = () => {
+    const envUrl = import.meta.env.VITE_BACKEND_URL;
+
+    if (envUrl && envUrl.trim().length > 0) {
+        return envUrl.trim().replace(/\/$/, "");
+    }
+
+    if (typeof window !== "undefined" && window.location?.origin) {
+        return window.location.origin;
+    }
+
+    return "http://localhost:3000";
+};
+
+const BACKEND_URL = resolveBackendUrl();
+
+const buildApiUrl = (path) => {
+    if (!path.startsWith("/")) {
+        return `${BACKEND_URL}/${path}`;
+    }
+
+    return `${BACKEND_URL}${path}`;
+};
 
 /*
  * This provider should export a `user` context state that is 
@@ -21,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     const getStoredToken = () => localStorage.getItem("token");
 
     const fetchCurrentUser = async (token) => {
-        const response = await fetch(`${BACKEND_URL}/user/me`, {
+        const response = await fetch(buildApiUrl("/user/me"), {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -86,7 +108,7 @@ export const AuthProvider = ({ children }) => {
      */
     const login = async (username, password) => {
         try {
-            const response = await fetch(`${BACKEND_URL}/login`, {
+            const response = await fetch(buildApiUrl("/login"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -121,7 +143,7 @@ export const AuthProvider = ({ children }) => {
      */
     const register = async (userData) => {
         try {
-            const response = await fetch(`${BACKEND_URL}/register`, {
+            const response = await fetch(buildApiUrl("/register"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
